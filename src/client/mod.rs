@@ -73,7 +73,7 @@ impl Client {
     }
 
     fn run_command(&mut self, command: Command) {
-        self.game.run_command(command.clone(), self.id.unwrap());
+        //self.game.run_command(command.clone(), self.id.unwrap());
         self.stream
             .as_mut()
             .unwrap()
@@ -244,15 +244,23 @@ impl Client {
     fn handle_keyboard_press(&mut self, key: Key) {
         match key {
             Key::Q => {
-                let command = Command::UseAbility {
-                    ability_id: 0,
-                    mouse_position: Some(Point::new(self.game_mouse_x, self.game_mouse_y)),
-                };
-                self.run_command(command);
+                self.mouse_command(0);
+            }
+
+            Key::W => {
+                self.mouse_command(1);
             }
 
             _ => {}
         }
+    }
+
+    fn mouse_command(&mut self, ability_id: u32) {
+        let command = Command::UseAbility {
+            ability_id: ability_id,
+            mouse_position: Some(Point::new(self.game_mouse_x, self.game_mouse_y)),
+        };
+        self.run_command(command);
     }
 
     fn handle_mouse_motion(&mut self, x: f64, y: f64) {

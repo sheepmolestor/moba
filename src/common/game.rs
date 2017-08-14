@@ -105,6 +105,7 @@ impl Game {
         id: EntityID,
         position: Point,
         target: Target,
+        radius: f64,
         damage: u16,
         team: Option<Team>,
         owner: EntityID,
@@ -114,7 +115,7 @@ impl Game {
                 .with(Position { point: position })
                 .with(Projectile { damage, owner })
                 .with(Renderable {
-                    radius: 5.0,
+                    radius: radius,
                     colour: [1.0, 0.0, 0.0, 1.0],
                 })
                 .with(Hitbox::new_ball(5.0))
@@ -232,6 +233,11 @@ impl Game {
         let entity = self.get_entity(origin).unwrap();
         let mut events = Vec::new();
 
+        let eid = self.next_entity_id();
+        let positionc = self.world.read::<Position>();
+        let teamc = self.world.read::<Team>();
+        let p = positionc.get(entity).unwrap().point;
+
         match command {
             Command::SetTarget(target) => {
                 let mut tc = self.world.write::<Unit>();
@@ -246,19 +252,37 @@ impl Game {
                 ability_id,
                 mouse_position,
             } => {
-                let eid = self.next_entity_id();
-                let positionc = self.world.read::<Position>();
-                let teamc = self.world.read::<Team>();
-                let p = positionc.get(entity).unwrap().point;
-                let e = Event::AddProjectile {
-                    id: eid,
-                    position: p,
-                    target: Target::Position(mouse_position.unwrap()),
-                    damage: 10,
-                    owner: origin,
-                    team: teamc.get(entity).cloned(),
-                };
-                events.push(e);
+                match ability_id {
+                    0 => {
+                        /*let e = Event::AddProjectile {
+                            id: eid,
+                            position: p,
+                            target: Target::Position(mouse_position.unwrap()),
+                            damage: 10,
+                            owner: origin,
+                            team: teamc.get(entity).cloned(),
+                        };*/
+                        events.push(Event::AddProjectile {
+                            id: eid,
+                            position: p,
+                            target: Target::Position(mouse_position.unwrap()),
+                            damage: 10,
+                            owner: origin,
+                            team: teamc.get(entity).cloned(),
+                        });
+                    }
+                    1 => {
+                        events.push(Event::AddExplosion {
+                            id: eid,
+                            position: mouse_position.unwrap(),
+                            radius: 25.0,
+                            damage: 10,
+                            owner: origin,
+                            team: teamc.get(entity).cloned(),
+                        });
+                    }
+                    _ => {}
+                }
             }
         }
 
@@ -301,7 +325,17 @@ impl Game {
                 owner,
                 team,
             } => {
-                self.add_projectile(id, position, target, damage, team, owner);
+                self.add_projectile(id, position, target, 5.0, damage, team, owner);
+            }
+            Event::AddExplosion {
+                id,
+                position,
+                radius,
+                damage,
+                owner,
+                team,
+            } => {
+                self.add_projectile(id, position, Target::Nothing, radius, damage, team, owner);
             }
             Event::DamageEntity { id, damage } => {
                 if let Some(e) = self.get_entity(id) {

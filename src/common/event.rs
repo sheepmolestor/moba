@@ -19,6 +19,14 @@ pub enum Event {
         team: Option<Team>,
         owner: EntityID,
     },
+    AddExplosion {
+        id: EntityID,
+        position: Point,
+        radius: f64,
+        damage: u16,
+        team: Option<Team>,
+        owner: EntityID,
+    },
     DamageEntity { id: EntityID, damage: u16 },
     RemoveEntity(EntityID),
 }
