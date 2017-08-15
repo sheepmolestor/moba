@@ -1,4 +1,5 @@
 pub const DEFAULT_PORT: u16 = 26137;
+pub const BIG_NUMBER: usize = 100;
 
 mod stream;
 pub use self::stream::*;

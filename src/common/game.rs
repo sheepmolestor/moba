@@ -91,7 +91,7 @@ impl Game {
                     channel_times: vec![0.5, 0.5],
                     time_until_cast: vec![0.5, 0.5],
                     ability_ids: vec![0, 1],
-                    active_index: 69,
+                    active_index: BIG_NUMBER,
                     target: Target::Nothing,
                 })
                 .with(Hitpoints::new_at_max(50))
@@ -262,7 +262,7 @@ impl Game {
             } => {
                         let mut ac = self.world.write::<AbilityUser>();
 
-                        if ac.get_mut(entity).unwrap().active_index == 69 {
+                        if ac.get_mut(entity).unwrap().active_index == BIG_NUMBER {
                             ac.get_mut(entity).unwrap().active_index = ability_id as usize;
                         }
                         ac.get_mut(entity).unwrap().target = Target::Position(mouse_position.unwrap());
