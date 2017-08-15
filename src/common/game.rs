@@ -36,6 +36,7 @@ impl Game {
         w.register::<Hitpoints>();
         w.register::<Team>();
         w.register::<BasicAttacker>();
+        w.register::<AbilityUser>();
 
         Game {
             entity_ids: Vec::new(),
@@ -85,6 +86,13 @@ impl Game {
                     attack_speed: hero.attack_speed(),
                     time_until_next_attack: 0.0,
                     range: hero.range(),
+                })
+                .with(AbilityUser {
+                    channel_times: vec![0.5, 0.5],
+                    time_until_cast: vec![0.5, 0.5],
+                    ability_ids: vec![0, 1],
+                    active_index: 69,
+                    target: Target::Nothing,
                 })
                 .with(Hitpoints::new_at_max(50))
                 .with(Velocity::new(0.0, 0.0));
@@ -252,37 +260,20 @@ impl Game {
                 ability_id,
                 mouse_position,
             } => {
-                match ability_id {
-                    0 => {
-                        /*let e = Event::AddProjectile {
+                        let mut ac = self.world.write::<AbilityUser>();
+
+                        if ac.get_mut(entity).unwrap().active_index == 69 {
+                            ac.get_mut(entity).unwrap().active_index = ability_id as usize;
+                        }
+                        ac.get_mut(entity).unwrap().target = Target::Position(mouse_position.unwrap());
+                        /*events.push(Event::AddProjectile {
                             id: eid,
                             position: p,
                             target: Target::Position(mouse_position.unwrap()),
                             damage: 10,
                             owner: origin,
                             team: teamc.get(entity).cloned(),
-                        };*/
-                        events.push(Event::AddProjectile {
-                            id: eid,
-                            position: p,
-                            target: Target::Position(mouse_position.unwrap()),
-                            damage: 10,
-                            owner: origin,
-                            team: teamc.get(entity).cloned(),
-                        });
-                    }
-                    1 => {
-                        events.push(Event::AddExplosion {
-                            id: eid,
-                            position: mouse_position.unwrap(),
-                            radius: 25.0,
-                            damage: 10,
-                            owner: origin,
-                            team: teamc.get(entity).cloned(),
-                        });
-                    }
-                    _ => {}
-                }
+                        });*/
             }
         }
 

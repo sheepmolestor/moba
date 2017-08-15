@@ -1,7 +1,8 @@
 [package]
 name = "moba"
 version = "0.1.0"
-authors = ["MovingtoMars <definitelynotliam@gmail.com>"]
+authors = ["MovingtoMars <definitelynotliam@gmail.com>",
+            "sheepmolestor <edwardchen114@gmail.com>"]
 
 [features]
 sdl2 = ["pistoncore-sdl2_window"]

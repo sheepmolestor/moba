@@ -19,6 +19,7 @@ pub fn register_systems<'a, 'b>(
     let d = d.add(CollisionSystem, "CollisionSystem", &[]);
     let d = d.add_barrier();
 
+    let d = d.add(AbilitySystem, "AbilitySystem", &[]);
     let d = d.add(BasicAttackerSystem, "BasicAttackerSystem", &[]);
     let d = d.add(ProjectileSystem, "ProjectileSystem", &[]); // XXX: race condition with BasicAttackerSystem?
 
@@ -234,6 +235,78 @@ impl<'a> specs::System<'a> for MotionSystem {
 
             let event = Event::EntityMove(id, Point::new(x, y));
             data.c.push_event(event);
+        }
+    }
+}
+
+#[derive(SystemData)]
+pub struct AbilityData<'a> {
+    ability_userc: WS<'a, AbilityUser>,
+    positionc: RS<'a, Position>,
+    teamc: RS<'a, Team>,
+    idc: RS<'a, EntityID>,
+
+    c: specs::Fetch<'a, Context>,
+}
+
+pub struct AbilitySystem;
+
+impl<'a> specs::System<'a> for AbilitySystem {
+    type SystemData = AbilityData<'a>;
+    fn run(&mut self, mut data: Self::SystemData) {
+        for (&id, position, mut ability_user) in (
+            &data.idc,
+            &data.positionc,
+            &mut data.ability_userc
+        ).join() {
+            let entity = data.c.get_entity(id).unwrap();
+            let ab = ability_user.active_index;
+
+            if ab == 69 {
+                continue;
+            }
+            assert!(ab < 69); // lol
+
+            if ability_user.time_until_cast[ab] > 0.0 {
+                ability_user.time_until_cast[ab] -= data.c.time;
+                ability_user.time_until_cast[ab] =
+                    ability_user.time_until_cast[ab].max(0.0);
+                continue;
+            }
+
+            assert!(ability_user.time_until_cast[ab] >= 0.0);
+
+            if let Target::Position(p) = ability_user.target {
+                match ability_user.active_index {
+                    0 => {
+                        data.c.push_event(Event::AddProjectile {
+                            id: data.c.next_entity_id(),
+                            position: position.point,
+                            target: Target::Position(p),
+                            damage: 10,
+                            team: data.teamc.get(entity).cloned(),
+                            owner: id,
+                        });
+                        ability_user.time_until_cast[ab] = ability_user.channel_times[ab];
+                        ability_user.target = Target::Nothing;
+                        ability_user.active_index = 69;
+                    }
+                    1 => {
+                        data.c.push_event(Event::AddExplosion {
+                            id: data.c.next_entity_id(),
+                            position: p,
+                            radius: 25.0,
+                            damage: 10,
+                            team: data.teamc.get(entity).cloned(),
+                            owner: id,
+                        });
+                        ability_user.time_until_cast[ab] = ability_user.channel_times[ab];
+                        ability_user.target = Target::Nothing;
+                        ability_user.active_index = 69;
+                    }
+                    _ => {}
+                }
+            }
         }
     }
 }

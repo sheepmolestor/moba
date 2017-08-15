@@ -154,6 +154,18 @@ impl specs::Component for Renderable {
     type Storage = specs::VecStorage<Renderable>;
 }
 
+pub struct AbilityUser {
+    pub channel_times: Vec<f64>,
+    pub time_until_cast: Vec<f64>,
+    pub ability_ids: Vec<u32>,
+    pub active_index: usize,
+    pub target: Target,
+}
+
+impl specs::Component for AbilityUser {
+    type Storage = specs::VecStorage<AbilityUser>;
+}
+
 pub struct BasicAttacker {
     pub attack_speed: f64, // attacks_per_second
     pub time_until_next_attack: f64,
