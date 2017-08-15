@@ -262,10 +262,10 @@ impl<'a> specs::System<'a> for AbilitySystem {
             let entity = data.c.get_entity(id).unwrap();
             let ab = ability_user.active_index;
 
-            if ab == 69 {
+            if ab == BIG_NUMBER {
                 continue;
             }
-            assert!(ab < 69); // lol
+            assert!(ab < BIG_NUMBER); // lol
 
             if ability_user.time_until_cast[ab] > 0.0 {
                 ability_user.time_until_cast[ab] -= data.c.time;
@@ -289,7 +289,7 @@ impl<'a> specs::System<'a> for AbilitySystem {
                         });
                         ability_user.time_until_cast[ab] = ability_user.channel_times[ab];
                         ability_user.target = Target::Nothing;
-                        ability_user.active_index = 69;
+                        ability_user.active_index = BIG_NUMBER;
                     }
                     1 => {
                         data.c.push_event(Event::AddExplosion {
@@ -302,7 +302,7 @@ impl<'a> specs::System<'a> for AbilitySystem {
                         });
                         ability_user.time_until_cast[ab] = ability_user.channel_times[ab];
                         ability_user.target = Target::Nothing;
-                        ability_user.active_index = 69;
+                        ability_user.active_index = BIG_NUMBER;
                     }
                     _ => {}
                 }
